@@ -1,0 +1,5 @@
+spotify_appkey.key
+slackbot_settings.py*
+*.pyc
+*.db
+tmp
