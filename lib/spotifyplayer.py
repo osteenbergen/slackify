@@ -38,6 +38,7 @@ class SpotifyPlayer(utils.EventEmitter):
         self.current = None
         self.playing = False
         self.login()
+        self.__search_history = {}
 
     def login(self):
         # Assuming a spotify_appkey.key in the current dir
@@ -94,14 +95,24 @@ class SpotifyPlayer(utils.EventEmitter):
         self.playing = False
         self.current = None
 
-    def search(self, query):
+    def search(self, query, user=None):
         search = self.session.search(query)
         search.load()
-        return map(
+        result = map(
             self.__convert_search,
             filter(
                 lambda x: x.availability == spotify.TrackAvailability.AVAILABLE,
                 search.tracks))
+        if not user == None:
+            self.__search_history[user] = result
+        return result
+
+    def search_history(self, user, index):
+        if user in self.__search_history:
+            result = self.__search_history[user]
+            if index < len(result):
+                return result[index]
+        return None
 
     def __convert_search(self, result):
         return Song(
