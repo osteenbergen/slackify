@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import logging
 import sqlite3
 from lib.bot import SlackifyBot
 from slackbot.bot import respond_to
@@ -18,20 +18,10 @@ def db_init(db):
 
 def main(db_location):
     slackify = Slackify()
-    slackify.bot = SlackifyBot()
+    slackify.log = logging.basicConfig(level=logging.DEBUG)
+    slackify.bot = SlackifyBot('music')
     slackify.db = sqlite3.connect(db_location)
     slackify.client = slackify.bot.client()
-
-    # Get the defaulf music channel ID
-    slackify.channel = None
-    for c in slackify.client.channels:
-        channel = slackify.client.channels[c]
-        if "name" in channel and channel["name"] == "music":
-            slackify.channel = channel["id"]
-            break
-    if slackify.channel == None:
-        raise "Could not find music channel"
-
     db_init(slackify.db)
     slackify.player = SpotifyPlayer()
     slackify.queue = QueueManager(slackify.player, slackify.db)
