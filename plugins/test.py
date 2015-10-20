@@ -1,6 +1,11 @@
-from slackbot.bot import respond_to
-from singleton import Slackify
+from slackbot.bot import listen_to
+from lib.singleton import Slackify
+import json
 
-@respond_to('play (.*)')
-def giveme(message, something):
-    message.reply('Here is %s' % something)
+print "Test loaded"
+@listen_to('^\<@(\w+)\>(:|)*$')
+def giveme(message,*args):
+    slackify = Slackify()
+    if not slackify.bot.verify(message):
+        return
+    message.reply('Hello World! : "%s"' % slackify.bot.userid)
