@@ -35,16 +35,16 @@ def playing(message,cmd,*args):
 
 @respond_to('pause$')
 def playing(message,*args):
+    slackify = Slackify()
     if not slackify.bot.verify(message):
         return
-    slackify = Slackify()
     if slackify.player.current != None:
         slackify.player.playpause()
     else:
         message.reply('No song currently playing')
 
 @respond_to('(s|search) (.*)$')
-def play_song(message,cmd,text,*args):
+def search_song(message,cmd,text,*args):
     slackify = Slackify()
     # Do not verify the message to allow for direct messages
     result = slackify.player.search(text, message.body["user"])
@@ -55,3 +55,10 @@ def play_song(message,cmd,text,*args):
         message.reply('Search result:\n%s' % "\n".join(songs))
     else:
         message.reply('No results for: %s' % text)
+
+@respond_to('stop$')
+def stop(message,*args):
+    slackify = Slackify()
+    if not slackify.bot.verify(message):
+        return
+    slackify.player.stop()

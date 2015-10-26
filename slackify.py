@@ -18,7 +18,7 @@ def db_init(db):
 
 def main(db_location):
     slackify = Slackify()
-    slackify.log = logging.basicConfig(level=logging.DEBUG)
+    slackify.log = logging.basicConfig(level=logging.INFO)
     slackify.bot = SlackifyBot('music')
     slackify.db = sqlite3.connect(db_location)
     slackify.client = slackify.bot.client()

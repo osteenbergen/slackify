@@ -10,6 +10,12 @@ class FakeMessage:
         if len(self.output) > 0:
             return self.output[0]
         return None
+    @property
+    def body(self):
+        return {
+            'user':'test',
+            'channel':'test'
+        }
 
 class PluginPlayerTest(unittest.TestCase):
     def setUp(self):
@@ -20,8 +26,8 @@ class PluginPlayerTest(unittest.TestCase):
         print msg.first_message()
         self.assertEqual(
             msg.first_message(),
-            "No song currently playing",
-            "No song should be playing")
+            None,
+            "There should not be any output")
 
     def test_play_not_playing(self):
         msg = FakeMessage()

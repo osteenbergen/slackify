@@ -6,7 +6,7 @@ Slack bot to play/queue Spotify
 ### Ubuntu
 
 #### Slack
-Install PIP package for python
+Install PIP package for python (lins05/slackbot)
 ```
 sudo apt-get install python-pip
 sudo pip install -r requirements
@@ -20,15 +20,17 @@ First you need to get the slack api token for your bot. You have two options:
 
 ##### Configure the api token
 
-Then you need to configure the `API_TOKEN` in a python module `slackbot_settings.py`, which must be located in a python import path.
+Then you need to configure the `API_TOKEN` in a python module `slackbot_settings.py`.
 
 slackbot_settings.py:
 
 ```python
 API_TOKEN = "<your-api-token>"
+PLUGINS = [
+    'slackbot.plugins',
+    'plugins',
+]
 ```
-
-Alternatively, you can use the environment variable `SLACKBOT_API_TOKEN`.
 
 #### Spotify
 Follow pyspotify installation on https://pyspotify.mopidy.com/en/latest/installation/
@@ -79,7 +81,7 @@ Search results are stored per user, you can only play from your own search resul
 - Queueing (started)
   - ```@slackify: queue <query>```: Add a number to the queue
   - ```@slackify: remove <queue_number>```: Remove a song you queued
-- Voting (planned) 
+- Voting (planned)
   - ```@slackify: vote <queue_number>```: Remove a song someone queued
   - ```@slackify: vote next```: Vote to skip current song
 - Play from history if queue is empty (planning)
