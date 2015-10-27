@@ -3,3 +3,4 @@ slackbot_settings.py*
 *.pyc
 *.db
 tmp
+credentials.py
