@@ -34,7 +34,7 @@ def playing(message,cmd,*args):
         message.reply('No song currently playing')
 
 @respond_to('pause$')
-def playing(message,*args):
+def pause(message,*args):
     slackify = Slackify()
     if not slackify.bot.verify(message):
         return
