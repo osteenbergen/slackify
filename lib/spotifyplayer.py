@@ -9,13 +9,20 @@ from spotify import utils
 import credentials
 
 class Song:
-    def __init__(self, uri, title, artist):
+    def __init__(self, uri, title, artist, duration):
         self.uri = uri
         self.title = title
         self.artist = artist
+        self.duration = duration
+
+    @property
+    def duration_readable(self):
+        seconds = int((self.duration / 1000) % 60)
+        minutes = int(self.duration / 1000 / 60)
+        return "%s:%s" %(minutes, seconds)
 
     def __str__(self):
-        return "%s - %s" % (self.artist, self.title)
+        return "%s - %s (%s)" % (self.artist, self.title, self.duration_readable)
 
     def __eq__(self, other):
         if not isinstance(other, Song):
@@ -118,7 +125,8 @@ class SpotifyPlayer(utils.EventEmitter):
         return Song(
             result.link.uri,
             result.name,
-            result.artists[0].name)
+            result.artists[0].name,
+            int(result.duration))
 
     def __on_end_of_track(self, data):
         if not self.current is None:

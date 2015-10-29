@@ -1,18 +1,21 @@
 import time
 import sqlite3
-from spotifyplayer import Song
+from spotifyplayer import Song, SpotifyPlayer
 
 class Queue:
     def from_db(self, record):
         self.id = record["id"]
-        self.song = Song(record["uri"], record["title"], record["artist"])
+        self.song = Song(record["uri"], record["title"], record["artist"], record["duration"])
         self.user = record["user"]
         self.added = record["added"]
         return self
+    def __str__(self):
+        pass
 
 class QueueManager:
     def __init__(self, player, db):
         self.player = player
+        self.player.on(SpotifyPlayer.PLAY_END, self.on_track_end)
         self.db = db
         self.current_id = 0
         self.__db_init()
@@ -20,8 +23,8 @@ class QueueManager:
     def queue(self, song, user):
         c = self.db.cursor()
         c.execute("""
-            INSERT INTO queue(uri, title, artist, user, added,deleted)
-            VALUES(?,?,?,?,?,?)
+            INSERT INTO queue(uri, title, artist, user, added, duration,deleted)
+            VALUES(?,?,?,?,?,?,?)
             """,
             (
                 song.uri,
@@ -29,6 +32,7 @@ class QueueManager:
                 song.artist,
                 user,
                 int(time.time()),
+                song.duration,
                 0
             ))
         return c.lastrowid
@@ -70,6 +74,12 @@ class QueueManager:
             (self.current_id,limit))
         return self.__convert_result(c, limit)
 
+    def on_track_end(self, current):
+        nxt = self.next()
+        if nxt:
+            self.current(nxt.id)
+            self.player.play(nxt.song)
+
     def __convert_result(self, cursor, limit):
         if limit == 1:
             data = cursor.fetchone()
@@ -90,6 +100,7 @@ class QueueManager:
                 artist TEXT,
                 user TEXT,
                 added INTEGER,
+                duration INTEGER,
                 deleted INTEGER
             )""")
         self.db.commit()

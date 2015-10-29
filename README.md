@@ -26,10 +26,7 @@ slackbot_settings.py:
 
 ```python
 API_TOKEN = "<your-api-token>"
-PLUGINS = [
-    'slackbot.plugins',
-    'plugins',
-]
+PLUGINS = ['plugins']
 ```
 
 #### Spotify

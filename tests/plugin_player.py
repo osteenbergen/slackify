@@ -23,7 +23,6 @@ class PluginPlayerTest(unittest.TestCase):
     def test_play(self):
         msg = FakeMessage()
         player.play_song(msg, "play","Crash Test Dummies - Mmm Mmm Mmm Mmm")
-        print msg.first_message()
         self.assertEqual(
             msg.first_message(),
             None,

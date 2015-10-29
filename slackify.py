@@ -19,11 +19,15 @@ def db_init(db):
 def main(db_location):
     slackify = Slackify()
     slackify.log = logging.basicConfig(level=logging.INFO)
-    slackify.bot = SlackifyBot('music')
-    slackify.db = sqlite3.connect(db_location)
-    slackify.client = slackify.bot.client()
+    slackify.bot = SlackifyBot('slackifytesting')
+    slackify.db = sqlite3.connect(db_location, check_same_thread=False)
+    slackify.client = slackify.bot.client
     db_init(slackify.db)
     slackify.player = SpotifyPlayer()
+    slackify.player.on(SpotifyPlayer.PLAY_TRACK, slackify.bot.on_play)
+    slackify.player.on(SpotifyPlayer.PLAY_PAUSE, slackify.bot.on_pause)
+    slackify.player.on(SpotifyPlayer.PLAY_PLAY, slackify.bot.on_play)
+    slackify.player.on(SpotifyPlayer.PLAY_STOP, slackify.bot.on_stop)
     slackify.queue = QueueManager(slackify.player, slackify.db)
     return slackify
 
