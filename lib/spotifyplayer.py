@@ -6,7 +6,6 @@ import threading
 import json
 import spotify
 from spotify import utils
-import credentials
 
 class Song:
     def __init__(self, uri, title, artist, duration):
@@ -35,25 +34,26 @@ class SpotifyPlayer(utils.EventEmitter):
     PLAY_PAUSE = "player_track_pause"
     PLAY_STOP = "player_track_stop"
     PLAY_END = "player_track_done"
-    def __init__(self):
+    def __init__(self, settings):
         # Initialize the EventEmitter
         super(SpotifyPlayer, self).__init__()
         self.session = None
         # Events for coordination
-        self.__logged_in = threading.Event()
-        self.__loop =  None
+        self._logged_in = threading.Event()
+        self._loop =  None
+        self._search_history = {}
+        self._settings = settings
         self.current = None
         self.playing = False
         self.login()
-        self.__search_history = {}
 
     def login(self):
         # Assuming a spotify_appkey.key in the current dir
         self.session = spotify.Session()
 
         # Process events in the background
-        self.__loop = spotify.EventLoop(self.session)
-        self.__loop.start()
+        self._loop = spotify.EventLoop(self.session)
+        self._loop.start()
 
         # Connect an audio sink
         if sys.platform == "darwin":
@@ -63,15 +63,15 @@ class SpotifyPlayer(utils.EventEmitter):
 
         # Register event listeners
         self.session.on(
-            spotify.SessionEvent.CONNECTION_STATE_UPDATED, self.__on_connection_state_updated)
-        self.session.on(spotify.SessionEvent.END_OF_TRACK, self.__on_end_of_track)
+            spotify.SessionEvent.CONNECTION_STATE_UPDATED, self._on_connection_state_updated)
+        self.session.on(spotify.SessionEvent.END_OF_TRACK, self._on_end_of_track)
 
         # Assuming a previous login with remember_me=True and a proper logout
-        if credentials.username == None or credentials.password == None:
+        if self._settings.SPOTIFY_USERNAME == None or self._settings.SPOTIFY_PASSWORD == None:
             raise StandardError("No username/password")
-        self.session.login(credentials.username,credentials.password)
+        self.session.login(self._settings.SPOTIFY_USERNAME,self._settings.SPOTIFY_PASSWORD)
 
-        self.__logged_in.wait()
+        self._logged_in.wait()
         return self.session
 
     def logout(self):
@@ -106,34 +106,34 @@ class SpotifyPlayer(utils.EventEmitter):
         search = self.session.search(query)
         search.load()
         result = map(
-            self.__convert_search,
+            self._convert_search,
             filter(
                 lambda x: x.availability == spotify.TrackAvailability.AVAILABLE,
                 search.tracks))
         if not user == None:
-            self.__search_history[user] = result
+            self._search_history[user] = result
         return result
 
     def search_history(self, user, index):
-        if user in self.__search_history:
-            result = self.__search_history[user]
+        if user in self._search_history:
+            result = self._search_history[user]
             if index < len(result):
                 return result[index]
         return None
 
-    def __convert_search(self, result):
+    def _convert_search(self, result):
         return Song(
             result.link.uri,
             result.name,
             result.artists[0].name,
             int(result.duration))
 
-    def __on_end_of_track(self, data):
+    def _on_end_of_track(self, data):
         if not self.current is None:
             self.emit(self.PLAY_END, self.current)
             self.playing = False
             self.current = None
 
-    def __on_connection_state_updated(self, session):
+    def _on_connection_state_updated(self, session):
         if self.session.connection.state is spotify.ConnectionState.LOGGED_IN:
-            self.__logged_in.set()
+            self._logged_in.set()

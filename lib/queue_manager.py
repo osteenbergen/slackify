@@ -13,7 +13,8 @@ class Queue:
         pass
 
 class QueueManager:
-    def __init__(self, player, db):
+    def __init__(self, player, db, settings):
+        self._settings = settings
         self.player = player
         self.player.on(SpotifyPlayer.PLAY_END, self.on_track_end)
         self.db = db

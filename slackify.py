@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import logging
 import sqlite3
+import slackbot_settings
 from lib.bot import SlackifyBot
 from slackbot.bot import respond_to
 from slackbot.bot import listen_to
@@ -17,18 +18,29 @@ def db_init(db):
     db.row_factory = dict_factory
 
 def main(db_location):
+    # Create the singleton class to map all objects
+    # Makes writing plugins easier
     slackify = Slackify()
+    # Store the settings
+    slackify.settings = slackbot_settings
+    # Create a logger
     slackify.log = logging.basicConfig(level=logging.INFO)
-    slackify.bot = SlackifyBot('slackifytesting')
+
+    # Database connection
     slackify.db = sqlite3.connect(db_location, check_same_thread=False)
-    slackify.client = slackify.bot.client
+    # Output dicts instead of arrays when querying
     db_init(slackify.db)
-    slackify.player = SpotifyPlayer()
-    slackify.player.on(SpotifyPlayer.PLAY_TRACK, slackify.bot.on_play)
-    slackify.player.on(SpotifyPlayer.PLAY_PAUSE, slackify.bot.on_pause)
-    slackify.player.on(SpotifyPlayer.PLAY_PLAY, slackify.bot.on_play)
-    slackify.player.on(SpotifyPlayer.PLAY_STOP, slackify.bot.on_stop)
-    slackify.queue = QueueManager(slackify.player, slackify.db)
+
+    # Start spotify
+    slackify.player = SpotifyPlayer(slackify.settings)
+
+    # The slackbot itself
+    slackify.bot = SlackifyBot(slackify.player, slackify.settings)
+    # Slack client, so we can send messages
+    slackify.client = slackify.bot.client
+
+    # Start the queue
+    slackify.queue = QueueManager(slackify.player, slackify.db, slackify.settings)
     return slackify
 
 if __name__ == "__main__":
