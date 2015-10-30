@@ -1,6 +1,21 @@
 # slackify
 Slack bot to play/queue Spotify
 
+## Settings
+Create a file called ```slackbot_settings.py``` with the following contents
+```python
+# Slackbot settings
+API_TOKEN = '<token>'
+# Force bot to only work on a single channel
+FIXED_CHANNEL = 'music'
+# Spotify settings
+SPOTIFY_USERNAME = '<username>'
+SPOTIFY_PASSWORD = '<password>'
+
+# Folder with the slack commands
+PLUGINS = ['plugins']
+```
+
 ## Installation
 
 ### Ubuntu
@@ -20,14 +35,7 @@ First you need to get the slack api token for your bot. You have two options:
 
 ##### Configure the api token
 
-Then you need to configure the `API_TOKEN` in a python module `slackbot_settings.py`.
-
-slackbot_settings.py:
-
-```python
-API_TOKEN = "<your-api-token>"
-PLUGINS = ['plugins']
-```
+Then you need to configure the `API_TOKEN` in the python module `slackbot_settings.py`.
 
 #### Spotify
 Follow pyspotify installation on https://pyspotify.mopidy.com/en/latest/installation/
@@ -59,6 +67,10 @@ To pause or continue
 @slackify: pause
 @slackify: play
 ```
+To stop playing
+```
+@slackify: stop
+```
 
 ### Search
 ```
@@ -70,13 +82,21 @@ To play a song from a search result use:
 ```
 Search results are stored per user, you can only play from your own search result
 
+### Queueing
+```
+@slackify: queue <query>
+```
+Or using the search result
+```
+@slackify: queue <search_numer>
+```
+
 ## TODO:
 - Player controls (started)
   - ```@slackify: stop```: Stop current song (and do not play queue)
   - ```@slackify: next```: Skip current song if you queued it
   - ```@slackify: volume <up/down> <number>```: Change the volume
 - Queueing (started)
-  - ```@slackify: queue <query>```: Add a number to the queue
   - ```@slackify: remove <queue_number>```: Remove a song you queued
 - Voting (planned)
   - ```@slackify: vote <queue_number>```: Remove a song someone queued
