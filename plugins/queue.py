@@ -30,8 +30,16 @@ def queue_song(message,cmd,*args):
     slackify = Slackify()
     result = slackify.queue.next(10)
     if len(result) > 1:
-        message.reply('Upcomming:\n%s' % "\n".join(result))
+        message.reply('Upcoming:\n%s' % "\n".join(map(str, result)))
     elif len(result) == 1:
         message.reply('Last song in queue:\n%s' % result[0])
     else:
         message.reply('The queue is empty')
+
+@respond_to('^(next|start)$')
+def queue_next(message, cmd, *args):
+    slackify = Slackify()
+    nxt = slackify.queue.next()
+    username = slackify.client.users[message.body["user"]]['name']
+    if slackify.player.current == None or slackify.queue.get_queue().user == username:
+            slackify.player.play(nxt.song)

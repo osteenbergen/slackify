@@ -16,10 +16,13 @@ class QueueManager:
     def __init__(self, player, db, settings):
         self._settings = settings
         self.player = player
-        self.player.on(SpotifyPlayer.PLAY_END, self.on_track_end)
+
         self.db = db
-        self.current_id = 0
         self.__db_init()
+
+        self.player.on(SpotifyPlayer.PLAY_END, self.on_track_end)
+        self.current_id = self.current_index()
+        self.current_queue = None
 
     def queue(self, song, user):
         c = self.db.cursor()
@@ -36,6 +39,8 @@ class QueueManager:
                 song.duration,
                 0
             ))
+        c.close()
+        self.db.commit()
         return c.lastrowid
 
     def clear(self):
@@ -44,7 +49,43 @@ class QueueManager:
         self.current_id = 0
 
     def current(self, index):
+        c = self.db.cursor()
+        c.execute("""
+            INSERT OR REPLACE INTO queue_data(key, num)
+            VALUES(?,?)
+        """, ("current",index))
+        c.close()
+        self.db.commit()
         self.current_id = index
+
+    def get_queue(self, index=None):
+        if index == None:
+            index = self.current_id
+        c = self.db.cursor()
+        c.execute("""
+            SELECT *
+            FROM queue
+            WHERE
+                id = ?
+            LIMIT 1
+            """,
+            int(index))
+        return self.__convert_result(c, 1)
+
+    def current_index(self):
+        c = self.db.cursor()
+        c.execute("""
+            SELECT *
+            FROM queue_data
+            WHERE
+                key = 'current'
+            LIMIT 1
+            """)
+        data = c.fetchone()
+        if data == None:
+            return 0
+        else:
+            return data['num']
 
     def random(self, limit=1):
         c = self.db.cursor()
@@ -60,6 +101,36 @@ class QueueManager:
             """,
             (self.current_id,limit))
         return self.__convert_result(c, limit)
+
+    def by_user(self, user, limit=1):
+        c = self.db.cursor()
+        c.execute("""
+            SELECT *
+            FROM queue
+            WHERE
+                user = ?
+            AND
+                deleted = 0
+            ORDER BY id DESC
+            LIMIT ?
+            """,
+            (user,limit))
+        return self.__convert_result(c, limit)
+
+    def delete(self, index):
+        c = self.db.cursor()
+        try:
+            c.execute("""
+                UDPATE queue
+                SET deleted=1
+                WHERE
+                    id = ?
+            """, self.index)
+            c.close()
+            self.db.commit()
+            return True
+        except:
+            return False
 
     def next(self, limit=1):
         c = self.db.cursor()
@@ -77,9 +148,12 @@ class QueueManager:
 
     def on_track_end(self, current):
         nxt = self.next()
+        q = self.get_queue()
         if nxt:
             self.current(nxt.id)
             self.player.play(nxt.song)
+        elif q != None and q.song == current:
+            self.current(self.current_id + 1)
 
     def __convert_result(self, cursor, limit):
         if limit == 1:
@@ -103,5 +177,12 @@ class QueueManager:
                 added INTEGER,
                 duration INTEGER,
                 deleted INTEGER
+            )""")
+        self.db.commit()
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS queue_data(
+                key TEXT PRIMARY KEY,
+                value TEXT,
+                num INTEGER
             )""")
         self.db.commit()
