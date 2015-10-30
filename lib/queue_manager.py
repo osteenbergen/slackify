@@ -10,7 +10,7 @@ class Queue:
         self.added = record["added"]
         return self
     def __str__(self):
-        pass
+        return "%s - %s (%s)" % (self.id, self.song, self.user)
 
 class QueueManager:
     def __init__(self, player, db, settings):
