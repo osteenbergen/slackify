@@ -1,6 +1,8 @@
 # slackify
 Slack bot to play/queue Spotify
 
+Not ready for use... Maybe next week ;)
+
 ## Settings
 Create a file called ```slackbot_settings.py``` with the following contents
 ```python
