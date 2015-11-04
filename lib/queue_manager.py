@@ -89,17 +89,16 @@ class QueueManager:
 
     def random(self, limit=1):
         c = self.db.cursor()
+
         c.execute("""
             SELECT *
             FROM queue
             WHERE
-                id > ?
-            AND
                 deleted = 0
             ORDER BY RANDOM()
             LIMIT ?
             """,
-            (self.current_id,limit))
+            (limit,))
         return self.__convert_result(c, limit)
 
     def by_user(self, user, limit=1):
@@ -152,8 +151,13 @@ class QueueManager:
         if nxt:
             self.current(nxt.id)
             self.player.play(nxt.song)
+            return
         elif q != None and q.song == current:
             self.current(self.current_id + 1)
+
+        random = self.random()
+        if random != None:
+            self.player.play(random.song)
 
     def __convert_result(self, cursor, limit):
         if limit == 1:

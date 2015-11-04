@@ -36,9 +36,16 @@ def queue_song(message,cmd,*args):
     else:
         message.reply('The queue is empty')
 
-@respond_to('^(next|start)$')
+@respond_to('^(n|next|start)$')
 def queue_next(message, cmd, *args):
     nxt = slackify.queue.next()
+    if nxt == None:
+        nxt = slackify.queue.random()
+        if nxt != None:
+            slackify.player.play(nxt.song)
+        else:
+            message.reply('There are no songs to play')
+        return
     username = slackify.client.users[message.body["user"]]['name']
     current_queue = slackify.queue.get_queue()
     if slackify.player.current == None or current_queue == None or current_queue.user == username:

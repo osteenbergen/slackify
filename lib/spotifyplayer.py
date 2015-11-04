@@ -97,8 +97,8 @@ class SpotifyPlayer(utils.EventEmitter):
         self.session.player.play(self.playing)
 
     def stop(self):
-        self.session.player.unload()
         self.emit(self.PLAY_STOP, self.current)
+        self.session.player.unload()
         self.playing = False
         self.current = None
 
@@ -129,10 +129,11 @@ class SpotifyPlayer(utils.EventEmitter):
             int(result.duration))
 
     def _on_end_of_track(self, data):
-        if not self.current is None:
-            self.emit(self.PLAY_END, self.current)
+        current = self.current
+        if self.current != None:
             self.playing = False
             self.current = None
+            self.emit(self.PLAY_END, current)
 
     def _on_connection_state_updated(self, session):
         if self.session.connection.state is spotify.ConnectionState.LOGGED_IN:
