@@ -61,6 +61,7 @@ class QueueManager:
     def get_queue(self, index=None):
         if index == None:
             index = self.current_id
+        print index
         c = self.db.cursor()
         c.execute("""
             SELECT *
@@ -69,7 +70,7 @@ class QueueManager:
                 id = ?
             LIMIT 1
             """,
-            int(index))
+            (index,))
         return self.__convert_result(c, 1)
 
     def current_index(self):
@@ -107,7 +108,7 @@ class QueueManager:
         c.execute("""
             SELECT *
             FROM queue
-            WHERE
+            WHEREslackify.queue.get_queue()
                 user = ?
             AND
                 deleted = 0
