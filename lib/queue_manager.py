@@ -61,7 +61,6 @@ class QueueManager:
     def get_queue(self, index=None):
         if index == None:
             index = self.current_id
-        print index
         c = self.db.cursor()
         c.execute("""
             SELECT *
@@ -108,7 +107,7 @@ class QueueManager:
         c.execute("""
             SELECT *
             FROM queue
-            WHEREslackify.queue.get_queue()
+            WHERE
                 user = ?
             AND
                 deleted = 0
@@ -122,11 +121,11 @@ class QueueManager:
         c = self.db.cursor()
         try:
             c.execute("""
-                UDPATE queue
+                UPDATE queue
                 SET deleted=1
                 WHERE
                     id = ?
-            """, self.index)
+            """, (index,))
             c.close()
             self.db.commit()
             return True
