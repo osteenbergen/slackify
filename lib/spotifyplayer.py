@@ -18,7 +18,7 @@ class Song:
     def duration_readable(self):
         seconds = int((self.duration / 1000) % 60)
         minutes = int(self.duration / 1000 / 60)
-        return "%s:%s" %(minutes, seconds)
+        return "%d:%02d" %(minutes, seconds)
 
     def __str__(self):
         return "%s - %s (%s)" % (self.artist, self.title, self.duration_readable)
