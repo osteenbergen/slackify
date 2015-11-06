@@ -23,7 +23,12 @@ class QueueManager:
         self.__db_init()
 
         self.player.on(SpotifyPlayer.PLAY_END, self.on_track_end)
-        self.current_id = self.current_index()
+        max_index = self.max_index()
+        current_index = self.current_index()
+        if current_index > max_index:
+            self.current_id = max_index
+        else:
+            self.current_id = self.current_index()
         self.current_queue = None
 
     def queue(self, song, user):
@@ -51,6 +56,8 @@ class QueueManager:
         self.current_id = 0
 
     def current(self, index):
+        if index > self.max_index():
+            return
         c = self.db.cursor()
         c.execute("""
             INSERT OR REPLACE INTO queue_data(key, num)
@@ -73,6 +80,18 @@ class QueueManager:
             """,
             (index,))
         return self.__convert_result(c, 1)
+
+    def max_index(self):
+        c = self.db.cursor()
+        c.execute("""
+            SELECT MAX(id) as max
+            FROM queue
+            """)
+        data = c.fetchone()
+        if data == None:
+            return 0
+        else:
+            return data['max']
 
     def current_index(self):
         c = self.db.cursor()
