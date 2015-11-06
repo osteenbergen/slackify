@@ -10,6 +10,8 @@ class Queue:
         self.added = record["added"]
         return self
     def __str__(self):
+        return unicode(self).encode('utf-8')
+    def __unicode__(self):
         return "%s - %s (%s)" % (self.id, self.song, self.user)
 
 class QueueManager:
