@@ -30,7 +30,7 @@ def queue_song(message,cmd,text,*args):
 def queue_song(message,cmd,*args):
     result = slackify.queue.next(10)
     if len(result) > 1:
-        message.reply('Upcoming:\n%s' % "\n".join(map(str, result)))
+        message.reply('Upcoming:\n%s' % "\n".join(map(lambda x: x.encode('utf-8'), result)))
     elif len(result) == 1:
         message.reply('Last song in queue:\n%s' % result[0])
     else:
