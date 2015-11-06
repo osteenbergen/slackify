@@ -1,11 +1,13 @@
 from slackbot.bot import Bot
 from lib.spotifyplayer import SpotifyPlayer
+from lib.queue_manager import QueueManager
 
 class SlackifyBot(Bot):
-    def __init__(self, player, settings=None):
+    def __init__(self, player, queue, settings=None):
         super(SlackifyBot,self).__init__()
         self._settings = settings
         self._player = player
+        self._queue = queue
         self.username = self._client.username
         self.userid = self._client.find_user_by_name(self.username)
         self.channelname = self._settings.FIXED_CHANNEL
@@ -22,7 +24,7 @@ class SlackifyBot(Bot):
                 raise "Could not find '%s' channel" % self.channelname
 
         # Hooks to the eventemitter
-        self._player.on(SpotifyPlayer.PLAY_TRACK, self._on_play)
+        self._player.on(SpotifyPlayer.PLAY_TRACK, self._on_start)
         self._player.on(SpotifyPlayer.PLAY_PAUSE, self._on_pause)
         self._player.on(SpotifyPlayer.PLAY_PLAY, self._on_play)
         self._player.on(SpotifyPlayer.PLAY_STOP, self._on_stop)
@@ -39,7 +41,19 @@ class SlackifyBot(Bot):
         return self._client
 
     def _on_start(self, song):
-        self._client.rtm_send_message(self.channelid, "Playing: %s" % song)
+        if self._player.mode == QueueManager.MODE_QUEUE:
+            queue = self._queue.get_queue()
+            self._client.rtm_send_message(
+                self.channelid,
+                "Playing queue %s: %s (%s)" % (
+                    queue.id,
+                    queue.song,
+                    queue.user
+                ))
+        elif self._player.mode == QueueManager.MODE_RANDOM:
+            self._client.rtm_send_message(self.channelid, "Playing random song: %s" % song)
+        else:
+            self._client.rtm_send_message(self.channelid, "Playing: %s" % song)
 
     def _on_pause(self, song):
         self._client.rtm_send_message(self.channelid, "Pausing: %s" % song)

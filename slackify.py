@@ -34,13 +34,13 @@ def main(db_location):
     # Start spotify
     slackify.player = SpotifyPlayer(slackify.settings)
 
-    # The slackbot itself
-    slackify.bot = SlackifyBot(slackify.player, slackify.settings)
-    # Slack client, so we can send messages
-    slackify.client = slackify.bot.client
-
     # Start the queue
     slackify.queue = QueueManager(slackify.player, slackify.db, slackify.settings)
+
+    # The slackbot itself
+    slackify.bot = SlackifyBot(slackify.player, slackify.queue, slackify.settings)
+    # Slack client, so we can send messages
+    slackify.client = slackify.bot.client
     return slackify
 
 if __name__ == "__main__":

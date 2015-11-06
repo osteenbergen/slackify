@@ -13,6 +13,8 @@ class Queue:
         return "%s - %s (%s)" % (self.id, self.song, self.user)
 
 class QueueManager:
+    MODE_QUEUE = "queue"
+    MODE_RANDOM = "random"
     def __init__(self, player, db, settings):
         self._settings = settings
         self.player = player
@@ -150,14 +152,17 @@ class QueueManager:
         q = self.get_queue()
         if nxt:
             self.current(nxt.id)
-            self.player.play(nxt.song)
-            return
-        elif q != None and q.song == current:
-            self.current(self.current_id + 1)
+            self.player.play(nxt.song, self.MODE_QUEUE)
+        else:
+            random = self.random()
+            if random != None:
+                self.player.play(random.song, self.MODE_RANDOM)
 
-        random = self.random()
-        if random != None:
-            self.player.play(random.song)
+        if self.player.mode == self.MODE_QUEUE and \
+            q != None and \
+            q.song == current and \
+            self.player.playing:
+                self.current(self.current_id + 1)
 
     def __convert_result(self, cursor, limit):
         if limit == 1:

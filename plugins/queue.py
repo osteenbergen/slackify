@@ -42,15 +42,15 @@ def queue_next(message, cmd, *args):
     if nxt == None:
         nxt = slackify.queue.random()
         if nxt != None:
-            slackify.player.play(nxt.song)
+            slackify.player.play(nxt.song, slackify.queue.MODE_RANDOM)
         else:
             message.reply('There are no songs to play')
         return
     username = slackify.client.users[message.body["user"]]['name']
     current_queue = slackify.queue.get_queue()
     if slackify.player.current == None or current_queue == None or current_queue.user == username:
-        slackify.player.play(nxt.song)
         slackify.queue.current(nxt.id)
+        slackify.player.play(nxt.song, slackify.queue.MODE_QUEUE)
     elif current_queue != None and current_queue.user != username:
         message.reply('Can only skip songs you queued')
 

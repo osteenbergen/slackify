@@ -34,6 +34,7 @@ class SpotifyPlayer(utils.EventEmitter):
     PLAY_PAUSE = "player_track_pause"
     PLAY_STOP = "player_track_stop"
     PLAY_END = "player_track_done"
+    MODE = "player"
     def __init__(self, settings):
         # Initialize the EventEmitter
         super(SpotifyPlayer, self).__init__()
@@ -45,6 +46,7 @@ class SpotifyPlayer(utils.EventEmitter):
         self._settings = settings
         self.current = None
         self.playing = False
+        self.mode = None
         self.login()
 
     def login(self):
@@ -78,7 +80,11 @@ class SpotifyPlayer(utils.EventEmitter):
         self.session.logout()
         self.session = None
 
-    def play(self, song):
+    def play(self, song, mode=None):
+        if mode == None:
+            self.mode = self.MODE
+        else:
+            self.mode = mode
         # Play a track
         self.current = song
         self.emit(self.PLAY_TRACK, self.current)
@@ -131,6 +137,7 @@ class SpotifyPlayer(utils.EventEmitter):
     def _on_end_of_track(self, data):
         current = self.current
         if self.current != None:
+            self.mode = None
             self.playing = False
             self.current = None
             self.emit(self.PLAY_END, current)

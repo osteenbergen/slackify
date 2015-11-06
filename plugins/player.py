@@ -27,7 +27,7 @@ def playing(message,cmd,*args):
     if not slackify.bot.verify(message):
         return
     if cmd == "playing":
-        message.reply('Currently playing: %s' % slackify.player.current)
+        message.reply('[%s] Currently playing: %s' % (slackify.player.mode,slackify.player.current))
     elif slackify.player.current != None:
         slackify.player.playpause()
     else:
