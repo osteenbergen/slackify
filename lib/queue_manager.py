@@ -174,6 +174,7 @@ class QueueManager:
         if nxt:
             self.current(nxt.id)
             self.player.play(nxt.song, self.MODE_QUEUE)
+            return
         else:
             random = self.random()
             if random != None:
