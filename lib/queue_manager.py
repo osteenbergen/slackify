@@ -69,6 +69,19 @@ class QueueManager:
         self.db.commit()
         self.current_id = index
 
+    def find(self, song):
+        c = self.db.cursor()
+        c.execute("""
+            SELECT *
+            FROM queue
+            WHERE
+                uri = ?
+            AND
+                deleted = 0
+            """,
+            (song.uri,))
+        return self.__convert_result(c)
+
     def get_queue(self, index=None):
         if index == None:
             index = self.current_id
@@ -186,7 +199,7 @@ class QueueManager:
             self.player.playing:
                 self.current(self.current_id + 1)
 
-    def __convert_result(self, cursor, limit):
+    def __convert_result(self, cursor, limit=None):
         if limit == 1:
             data = cursor.fetchone()
             if data == None:

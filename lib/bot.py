@@ -51,7 +51,15 @@ class SlackifyBot(Bot):
                     queue.user
                 ))
         elif self._player.mode == QueueManager.MODE_RANDOM:
-            self._client.rtm_send_message(self.channelid, "Playing random song: %s" % song)
+            history = self._queue.find(song)
+            if len(history) == 1:
+                self._client.rtm_send_message(
+                    self.channelid,
+                    "Playing random song: %s" % history[0])
+            else:
+                self._client.rtm_send_message(
+                    self.channelid,
+                    "Playing random song which was queued %d times: %s" % (len(history),history[0]))
         else:
             self._client.rtm_send_message(self.channelid, "Playing: %s" % song)
 
