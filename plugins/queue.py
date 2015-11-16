@@ -1,5 +1,6 @@
 from slackbot.bot import respond_to
 from lib.singleton import Slackify
+from lib.queue_manager import QueueManager
 import json
 
 slackify = Slackify()
@@ -48,7 +49,7 @@ def queue_next(message, cmd, *args):
         return
     username = slackify.client.users[message.body["user"]]['name']
     current_queue = slackify.queue.get_queue()
-    if slackify.player.current == None or current_queue == None or current_queue.user == username:
+    if slackify.player.current == None or current_queue == None or current_queue.user == username or slackify.player.mode == QueueManager.MODE_RANDOM:
         slackify.queue.current(nxt.id)
         slackify.player.play(nxt.song, slackify.queue.MODE_QUEUE)
     elif current_queue != None and current_queue.user != username:
