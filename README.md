@@ -1,7 +1,13 @@
 # slackify
 Slack bot to play/queue Spotify
 
-Not ready for use... Maybe next week ;)
+Used&Tested daily in our office with a simple setup. Install on a box connected to speakers and enjoy.
+
+## Features
+- Searching spotify
+- Playing songs
+- Queueing songs
+- Random song from queue history if queue is empty
 
 ## Settings
 Create a file called ```slackbot_settings.py``` with the following contents
@@ -92,18 +98,19 @@ Or using the search result
 ```
 @slackify: queue <search_numer>
 ```
+Skip your song in the queue
+```
+@slackify: next
+```
 
 ## TODO:
 - Player controls (started)
-  - ```@slackify: stop```: Stop current song (and do not play queue)
-  - ```@slackify: next```: Skip current song if you queued it
   - ```@slackify: volume <up/down> <number>```: Change the volume
 - Queueing (started)
   - ```@slackify: remove <queue_number>```: Remove a song you queued
 - Voting (planned)
   - ```@slackify: vote <queue_number>```: Remove a song someone queued
   - ```@slackify: vote next```: Vote to skip current song
-- Play from history if queue is empty (planning)
 - Admin (future)
   - Configuration file should list one or more admins
   - ```@slackify: admin add <user>```: Add user as admin
