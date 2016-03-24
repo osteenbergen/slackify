@@ -5,6 +5,7 @@ import copy
 import threading
 import json
 import spotify
+import spotipy
 from spotify import utils
 
 class Song:
@@ -21,6 +22,9 @@ class Song:
         return "%d:%02d" %(minutes, seconds)
 
     def __str__(self):
+        return unicode(self).encode('utf-8')
+    
+    def __unicode__(self):
         return "%s - %s (%s)" % (self.artist, self.title, self.duration_readable)
 
     def __eq__(self, other):
@@ -39,6 +43,7 @@ class SpotifyPlayer(utils.EventEmitter):
         # Initialize the EventEmitter
         super(SpotifyPlayer, self).__init__()
         self.session = None
+        self.web = spotipy.Spotify()
         # Events for coordination
         self._logged_in = threading.Event()
         self._loop =  None
@@ -109,13 +114,12 @@ class SpotifyPlayer(utils.EventEmitter):
         self.current = None
 
     def search(self, query, user=None):
-        search = self.session.search(query)
-        search.load()
+        search = self.web.search(q=query, limit=25, type="track")
         result = map(
             self._convert_search,
             filter(
-                lambda x: x.availability == spotify.TrackAvailability.AVAILABLE,
-                search.tracks))
+                lambda x: self._settings.SPOTIFY_MARKET in x['available_markets'],
+                search['tracks']['items']))
         if not user == None:
             self._search_history[user] = result
         return result
@@ -129,10 +133,10 @@ class SpotifyPlayer(utils.EventEmitter):
 
     def _convert_search(self, result):
         return Song(
-            result.link.uri,
-            result.name,
-            result.artists[0].name,
-            int(result.duration))
+            result['uri'],
+            result['name'],
+            result['artists'][0]['name'],
+            int(result['duration_ms']))
 
     def _on_end_of_track(self, data):
         current = self.current
