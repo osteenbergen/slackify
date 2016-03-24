@@ -23,7 +23,7 @@ class Song:
 
     def __str__(self):
         return unicode(self).encode('utf-8')
-    
+
     def __unicode__(self):
         return "%s - %s (%s)" % (self.artist, self.title, self.duration_readable)
 
@@ -114,7 +114,7 @@ class SpotifyPlayer(utils.EventEmitter):
         self.current = None
 
     def search(self, query, user=None):
-        search = self.web.search(q=query, limit=25, type="track")
+        search = self.web.search(q=query, limit=25, type="track",market=self._settings.SPOTIFY_MARKET)
         result = map(
             self._convert_search,
             filter(
