@@ -25,7 +25,7 @@ class Song:
         return unicode(self).encode('utf-8')
 
     def __unicode__(self):
-        return "%s - %s (%s)" % (self.artist, self.title, self.duration_readable)
+        return u"{0} - {1} ({2})".format(self.artist, self.title, self.duration_readable)
 
     def __eq__(self, other):
         if not isinstance(other, Song):

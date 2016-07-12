@@ -12,7 +12,7 @@ class Queue:
     def __str__(self):
         return unicode(self).encode('utf-8')
     def __unicode__(self):
-        return "%s - %s (%s)" % (self.id, self.song, self.user)
+        return u"{0} - {1} ({2})".format(self.id, self.song, self.user)
 
 class QueueManager:
     MODE_QUEUE = "queue"
