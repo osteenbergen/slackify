@@ -21,15 +21,15 @@ class PlayerTest(unittest.TestCase):
         self.assertEqual(self.song, song_info, "Should return same song")
         self.assertEqual(self.player.current, self.song, "Should return same song")
         self.assertEqual(self.player.playing, True, "Song should be playing")
-        print("\nYou should hear a song playing: %s - %s" %
-            (self.song.artist, self.song.title))
+        print(u"\nYou should hear a song playing:: {0} - {1}".format(
+            self.song.artist, self.song.title))
         time.sleep(3)
 
     def test_pause(self):
         song_info = self.player.play(self.song)
         self.assertTrue(self.player.playing, "Song should be playing")
-        print("\nYou should hear a song playing, pause and continue: %s - %s" %
-            (self.song.artist, self.song.title))
+        print(u"\nYou should hear a song playing, pause and continue: {0} - {1}".format(
+            self.song.artist, self.song.title))
         time.sleep(2)
 
         print("Song should now pause")
@@ -45,8 +45,8 @@ class PlayerTest(unittest.TestCase):
     def test_stop(self):
         song_info = self.player.play(self.song)
         self.assertTrue(self.player.playing, "Song should be playing")
-        print("\nYou should hear a song playing and stop: %s - %s" %
-            (self.song.artist, self.song.title))
+        print(u"\nYou should hear a song playing and stop:: {0} - {1}".format(
+            self.song.artist, self.song.title))
         time.sleep(4)
 
         print("Song should now stop")

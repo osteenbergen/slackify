@@ -19,7 +19,7 @@ def play_song(message,cmd,text,*args):
         if len(result):
             slackify.player.play(result[0])
         else:
-            message.reply('No results for: %s' % text)
+            message.reply(u'No results for: {0}'.format(text))
 
 @respond_to('^(p|play(ing)?)$')
 def playing(message,cmd,*args):
@@ -27,7 +27,7 @@ def playing(message,cmd,*args):
     if not slackify.bot.verify(message):
         return
     if cmd == "playing":
-        message.reply('[%s] Currently playing: %s' % (slackify.player.mode,slackify.player.current))
+        message.reply(u'[{0}] Currently playing: {1}'.format(slackify.player.mode,slackify.player.current))
     elif slackify.player.current != None:
         slackify.player.playpause()
     else:
@@ -51,10 +51,10 @@ def search_song(message,cmd,text,*args):
     if len(result):
         songs = []
         for idx, song in enumerate(result):
-            songs.append("%s | %s" %(idx + 1, song))
-        message.reply('Search result:\n%s' % "\n".join(songs))
+            songs.append(u'{0} | {1}'.format(idx + 1, song))
+        message.reply(u'Search result:\n{0}'.format("\n".join(songs)))
     else:
-        message.reply('No results for: %s' % text)
+        message.reply(u'No results for: {0}'.format(text))
 
 @respond_to('^stop$')
 def stop(message,*args):

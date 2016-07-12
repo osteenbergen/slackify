@@ -18,22 +18,22 @@ def queue_song(message,cmd,text,*args):
             message.reply('Not a valid search index ')
         else:
             index = slackify.queue.queue(result, username)
-            message.reply('Queue %s: %s' % (index, result))
+            message.reply(u'Queue {0}: {1}'.format(index, result))
     else:
         result = slackify.player.search(text)
         if len(result):
             index = slackify.queue.queue(result[0], username)
-            message.reply('Queue %s: %s' % (index, result[0]))
+            message.reply(u'Queue {0}: {1}'.format(index, result[0]))
         else:
-            message.reply('No results for: %s' % text)
+            message.reply(u'No results for: {0}'.format(text))
 
 @respond_to('^(q|queue)$')
 def queue_song(message,cmd,*args):
     result = slackify.queue.next(10)
     if len(result) > 1:
-        message.reply(u'Upcoming:\n%s' % u'\n'.join(map(unicode, result)))
+        message.reply(u'Upcoming:\n{0}'.format(u'\n'.join(map(unicode, result))))
     elif len(result) == 1:
-        message.reply('Last song in queue:\n%s' % result[0])
+        message.reply(u'Last song in queue:\n{0}'.format(result[0]))
     else:
         message.reply('The queue is empty')
 
@@ -93,6 +93,6 @@ def queue_remove(message, cmd, position):
     else:
         state = slackify.queue.delete(number)
         if state:
-            message.reply('Removed %s' % deleted)
+            message.reply(u'Removed {0}'.format(deleted))
         else:
-            message.reply('Could not remove: %s' % deleted)
+            message.reply(u'Could not remove: {0}'.format(deleted))

@@ -21,7 +21,7 @@ class SlackifyBot(Bot):
                     self.channelid = channel["id"]
                     break
             if self.channelid == None:
-                raise "Could not find '%s' channel" % self.channelname
+                raise Exception(u"Could not find '{0}' channel".format(self.channelname))
 
         # Hooks to the eventemitter
         self._player.on(SpotifyPlayer.PLAY_TRACK, self._on_start)
@@ -32,7 +32,7 @@ class SlackifyBot(Bot):
     def verify(self,message):
         if self.channelid != None:
             if self.channelid != message.body["channel"]:
-                message.reply("Incorrect channel, use %s" % self.channelname)
+                message.reply(u"Incorrect channel, use {0}".format(self.channelname))
                 return False
         return True
 
@@ -45,7 +45,7 @@ class SlackifyBot(Bot):
             queue = self._queue.get_queue()
             self._client.rtm_send_message(
                 self.channelid,
-                "Playing queue %s: %s (%s)" % (
+                u"Playing queue {0}: {1} ({2})".format(
                     queue.id,
                     queue.song,
                     queue.user
@@ -55,19 +55,19 @@ class SlackifyBot(Bot):
             if len(history) == 1:
                 self._client.rtm_send_message(
                     self.channelid,
-                    "Playing random song: %s" % history[0])
+                    u"Playing random song: {0}".format(history[0]))
             else:
                 self._client.rtm_send_message(
                     self.channelid,
-                    "Playing random song which was queued %d times: %s" % (len(history),history[0]))
+                    u"Playing random song which was queued {0} times: {1}".format(len(history),history[0]))
         else:
-            self._client.rtm_send_message(self.channelid, "Playing: %s" % song)
+            self._client.rtm_send_message(self.channelid, u"Playing: {0}".format(song))
 
     def _on_pause(self, song):
-        self._client.rtm_send_message(self.channelid, "Pausing: %s" % song)
+        self._client.rtm_send_message(self.channelid, u"Pausing: {0}".format(song))
 
     def _on_play(self, song):
-        self._client.rtm_send_message(self.channelid, "Playing: %s" % song)
+        self._client.rtm_send_message(self.channelid, u"Playing: {0}".format(song))
 
     def _on_stop(self, song):
-        self._client.rtm_send_message(self.channelid, "Stopping: %s" % song)
+        self._client.rtm_send_message(self.channelid, u"Stopping: {0}".format(song))
