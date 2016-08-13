@@ -64,6 +64,17 @@ Finally install the correct audio driver:
 sudo apt-get install python-alsaaudio
 ```
 
+### OSX
+
+Follow instructions for Ubuntu and read the source websites for the spotify python library.
+
+The audio driver for OSX is PyAudio:
+```
+pip install pyaudio
+```
+
+OSX should be detected and use this library, although this is untested
+
 ## Commands
 
 ### Play
