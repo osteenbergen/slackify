@@ -12,3 +12,16 @@ def reconnect(message,*args):
 def listen(message, *args):
     print "Reconnecting as new user joined"
     slackify.client.reconnect()
+
+@respond_to('help')
+def help(message, *args):
+    message.reply("""Available commands:
+- `play QUERY`: play a song now
+- `next`: Skip current song
+- `queue QUERY`: queue a song
+- `queue`: Show the current queue
+- `search QUERY`: search spotify
+- `play NUMBER`: play song from search result
+- `queue NUMBER`: queue song from search result
+- `remove NUMBER`: Remove number from queue/playlist
+""")
