@@ -114,7 +114,7 @@ class SpotifyPlayer(utils.EventEmitter):
         self.current = None
 
     def search(self, query, user=None):
-        search = self.web.search(q=query, limit=25, type="track",market=self._settings.SPOTIFY_MARKET)
+        search = self.web._get('search', q=query, limit=25, type="track",market=self._settings.SPOTIFY_MARKET)
         result = map(
             self._convert_search,
             filter(
