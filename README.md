@@ -19,6 +19,7 @@ FIXED_CHANNEL = 'music'
 # Spotify settings
 SPOTIFY_USERNAME = '<username>'
 SPOTIFY_PASSWORD = '<password>'
+SPOTIFY_MARKET = 'NL'
 
 # Folder with the slack commands
 PLUGINS = ['plugins']
