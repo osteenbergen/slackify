@@ -28,7 +28,8 @@ def queue_song(message,cmd,text,*args):
             message.reply(u'No results for: {0}'.format(text))
 
 @respond_to('^(q|queue)$')
-def queue_song(message,cmd,*args):
+@respond_to('^$')
+def queue_list(message,cmd=None,*args):
     result = slackify.queue.next(10)
     if len(result) > 1:
         message.reply(u'Upcoming:\n{0}'.format(u'\n'.join(map(unicode, result))))
