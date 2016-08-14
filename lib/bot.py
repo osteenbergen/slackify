@@ -42,6 +42,9 @@ class SlackifyBot(Bot):
         return self._client
 
     def _on_start(self, song):
+        if not song:
+            return
+        
         message = {
             'channel' : self.channelid
         }

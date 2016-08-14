@@ -36,6 +36,9 @@ def help(message, *args):
 - `play NUMBER`: play song from search result
 - `queue NUMBER`: queue song from search result
 - `remove NUMBER`: Remove number from queue/playlist
+- `related`: Show related songs to current song
+- `mode related`: Play related songs when queue is empty
+- `mode random`: Play previously played songs when queue is empty
 - `show album art`: Display album art when starting a song
 - `hide album art`: Do not show album art
 """)

@@ -6,6 +6,7 @@ import threading
 import json
 import spotify
 import spotipy
+import random
 from spotify import utils
 
 class Song:
@@ -53,6 +54,8 @@ class SpotifyPlayer(utils.EventEmitter):
         self.playing = False
         self.mode = None
         self.login()
+        self.history_length = 10
+        self.history = []
 
     def login(self):
         # Assuming a spotify_appkey.key in the current dir
@@ -92,12 +95,74 @@ class SpotifyPlayer(utils.EventEmitter):
             self.mode = mode
         # Play a track
         self.current = song
+
+        # Add to history
+        self.history.insert(0, song)
+        if len(self.history) > self.history_length:
+            self.history = self.history[0:self.history_length]
+
+        self.session.player.unload()
         self.emit(self.PLAY_TRACK, self.current)
         trackdata = self.session.get_track(song.uri).load()
         self.session.player.load(trackdata)
         self.session.player.play()
         self.playing = True
         return song
+
+    def related(self, song=None, user=None, single=False, artist_limit = 5, song_limit=5):
+        # Use the current song if no song is supplied
+        if not song:
+            song = self.current
+        # Use the history if no song is supplied
+        if not song and len(self.history) > 0:
+            song = self.history[0]
+        if not song:
+            return None
+        track = self.web.track(song.uri)
+        artist = track['artists'][0]['id']
+        rel_artists = self.web.artist_related_artists(artist)
+
+        top_artists = sorted(rel_artists['artists'],key=lambda a: a['popularity'], reverse=True)
+
+        if len(top_artists) == 0:
+            return None
+        # Pick a random related artists
+        if single:
+            top_artists = [random.choice(top_artists)]
+            song_limit = 99 #increase the limit to allow for a more random pick
+        else:
+            top_artists = top_artists[0:artist_limit]
+
+        top_tracks = map(
+            lambda a:
+                sorted(
+                    self.web.artist_top_tracks(
+                            a['id'],
+                            country=self._settings.SPOTIFY_MARKET
+                        )['tracks'],
+                    key=lambda a: a['popularity'],
+                    reverse=True
+                )[0:song_limit],
+            top_artists
+        )
+        flat_top_tracks = [item for sublist in top_tracks for item in sublist]
+
+        # Convert to song objects
+        result = map(
+            self._convert_search,
+            flat_top_tracks)
+
+        if len(result) == 0:
+            return None
+
+        if not user == None:
+            self._search_history[user] = result
+
+        if single:
+            return random.choice(result)
+
+        return result
+
 
     def playpause(self):
         self.playing = not self.playing
@@ -135,7 +200,7 @@ class SpotifyPlayer(utils.EventEmitter):
         return Song(
             result['uri'],
             result['name'],
-            result['artists'][0]['name'],
+            ', '.join(map(lambda a: a['name'], result['artists'])),
             int(result['duration_ms']))
 
     def _on_end_of_track(self, data):
@@ -144,6 +209,7 @@ class SpotifyPlayer(utils.EventEmitter):
             self.mode = None
             self.playing = False
             self.current = None
+            self.session.player.unload()
             self.emit(self.PLAY_END, current)
 
     def _on_connection_state_updated(self, session):

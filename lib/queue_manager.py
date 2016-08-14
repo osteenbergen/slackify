@@ -17,12 +17,15 @@ class Queue:
 class QueueManager:
     MODE_QUEUE = "queue"
     MODE_RANDOM = "random"
+    MODE_RELATED = "related"
     def __init__(self, player, db, settings):
         self._settings = settings
         self.player = player
+        self.mode = self.MODE_RANDOM
 
         self.db = db
         self.__db_init()
+        self._end_track_timeout = 0
 
         self.player.on(SpotifyPlayer.PLAY_END, self.on_track_end)
         max_index = self.max_index()
@@ -182,22 +185,37 @@ class QueueManager:
         return self.__convert_result(c, limit)
 
     def on_track_end(self, current):
+        # Sometimes end track triggers multiple times ensure 2 second cooldown  period
+        now = int(time.time())
+        if self._end_track_timeout + 2 > now:
+            print u'End track timeout prevention'
+            return
+        else:
+            self._end_track_timeout = now
+
         nxt = self.next()
         q = self.get_queue()
         if nxt:
             self.current(nxt.id)
             self.player.play(nxt.song, self.MODE_QUEUE)
             return
-        else:
-            random = self.random()
-            if random != None:
-                self.player.play(random.song, self.MODE_RANDOM)
+
+        if self.mode == self.MODE_RELATED:
+            result = self.player.related(song=current, single=True)
+            if result:
+                self.player.play(result, self.MODE_RELATED)
+                return
 
         if self.player.mode == self.MODE_QUEUE and \
             q != None and \
             q.song == current and \
             self.player.playing:
                 self.current(self.current_id + 1)
+
+        r = self.random()
+        if r != None:
+            self.player.play(r.song, self.MODE_RANDOM)
+            return
 
     def __convert_result(self, cursor, limit=None):
         if limit == 1:

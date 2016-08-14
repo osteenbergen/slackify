@@ -108,18 +108,59 @@ Search results are stored per user, you can only play from your own search resul
 ```
 Or using the search result
 ```
-@slackify: queue <search_numer>
+@slackify: queue <search_number>
 ```
 Skip your song in the queue
 ```
 @slackify: next
 ```
+Remove a song from the queue
+```
+@slackify: remove <number>
+```
+
+### Related
+When a song is playing you can query related artists and their top songs
+```
+@slackify: related
+```
+Now you can play/queue the result like a normal search
+
+By default the player will continue playing songs you queued before (random mode).
+You can however toggle to related mode. Now the player will pick a random related artist
+and play one of its top tracks.
+
+To view the current mode
+```
+@slackify: mode
+```
+Change the mode:
+```
+@slackify: mode related
+@slackify: mode random
+```
+
+### Album Art
+To show or hide album art when a new song starts
+```
+@slackify: hide album art
+@slackify: show album art
+```
+
+### Other
+A simple command overview
+```
+@slackify: help
+```
+
+Sometimes a recently joined user can't use the bot, a reconnect can solve this issue.
+```
+@slackify: reconnect
+```
 
 ## TODO:
-- Player controls (started)
+- Player controls (planned)
   - ```@slackify: volume <up/down> <number>```: Change the volume
-- Queueing (started)
-  - ```@slackify: remove <queue_number>```: Remove a song you queued
 - Voting (planned)
   - ```@slackify: vote <queue_number>```: Remove a song someone queued
   - ```@slackify: vote next```: Vote to skip current song
