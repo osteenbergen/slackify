@@ -8,6 +8,7 @@ class SlackifyBot(Bot):
         self._settings = settings
         self._player = player
         self._queue = queue
+        self.show_album_art = self._settings.SHOW_ALBUM_ART if hasattr(self._settings,'SHOW_ALBUM_ART') else True
         self.username = self._client.username
         self.userid = self._client.find_user_by_name(self.username)
         self.channelname = self._settings.FIXED_CHANNEL
@@ -41,33 +42,52 @@ class SlackifyBot(Bot):
         return self._client
 
     def _on_start(self, song):
+        if not song:
+            return
+        
+        message = {
+            'channel' : self.channelid
+        }
+
         if self._player.mode == QueueManager.MODE_QUEUE:
             queue = self._queue.get_queue()
-            self._client.rtm_send_message(
-                self.channelid,
-                u"Playing queue {0}: {1} ({2})".format(
+            message['message'] = u"Playing queue {0}: {1} ({2})".format(
                     queue.id,
                     queue.song,
                     queue.user
-                ))
+                )
         elif self._player.mode == QueueManager.MODE_RANDOM:
             history = self._queue.find(song)
             if len(history) == 1:
-                self._client.rtm_send_message(
-                    self.channelid,
-                    u"Playing random song: {0}".format(history[0]))
+                message['message'] = u"Playing random song: {0}".format(history[0])
             else:
-                self._client.rtm_send_message(
-                    self.channelid,
-                    u"Playing random song which was queued {0} times: {1}".format(len(history),history[0]))
+                message['message'] = u"Playing random song which was queued {0} times: {1}".format(len(history),history[0])
         else:
-            self._client.rtm_send_message(self.channelid, u"Playing: {0}".format(song))
+            message['message'] = u"Playing: {0}".format(song)
+
+        if self.show_album_art:
+            try:
+                # Query spotify for the info
+                info = self._player.web.track(song.uri)
+                if 'album' in info and 'images' in info['album'] and len(info['album']['images']) > 0:
+                    images = info['album']['images']
+                    # find highest quality image
+                    image = sorted(images, reverse=True, key=lambda x: x['width'])[0]
+                    attachment = {
+                        'image_url': image['url'],
+                        'text':''
+                    }
+                    message['attachments'] = [attachment]
+            except Exception as err:
+                print err
+
+        self._client.send_message(**message)
 
     def _on_pause(self, song):
-        self._client.rtm_send_message(self.channelid, u"Pausing: {0}".format(song))
+        self._client.send_message(self.channelid, u"Pausing: {0}".format(song))
 
     def _on_play(self, song):
-        self._client.rtm_send_message(self.channelid, u"Playing: {0}".format(song))
+        self._client.send_message(self.channelid, u"Playing: {0}".format(song))
 
     def _on_stop(self, song):
-        self._client.rtm_send_message(self.channelid, u"Stopping: {0}".format(song))
+        self._client.send_message(self.channelid, u"Stopping: {0}".format(song))

@@ -28,7 +28,8 @@ def queue_song(message,cmd,text,*args):
             message.reply(u'No results for: {0}'.format(text))
 
 @respond_to('^(q|queue)$')
-def queue_song(message,cmd,*args):
+@respond_to('^$')
+def queue_list(message,cmd=None,*args):
     result = slackify.queue.next(10)
     if len(result) > 1:
         message.reply(u'Upcoming:\n{0}'.format(u'\n'.join(map(unicode, result))))
@@ -56,24 +57,28 @@ def queue_next(message, cmd, *args):
     #   Nothing in the queue and nothing is playing OR
     #   User listening a song (s)he queued OR
     #   Just playing a single song OR
-    #   Random playing mode
+    #   Random/Related playing mode
+
     elif nxt != None and \
         (   slackify.player.current == None or \
             (current_queue == None and slackify.player.playing == False) or \
             current_queue.user == username or \
             slackify.player.mode == slackify.player.MODE or \
-            slackify.player.mode == QueueManager.MODE_RANDOM):
+            slackify.player.mode in [QueueManager.MODE_RELATED, QueueManager.MODE_RANDOM]):
                 slackify.queue.current(nxt.id)
-                slackify.player.play(nxt.song, slackify.queue.MODE_QUEUE)
-    # Start a random song
-    elif nxt == None:
-        nxt = slackify.queue.random()
-        if nxt != None:
-            slackify.player.play(nxt.song, slackify.queue.MODE_RANDOM)
-        else:
-            message.reply('There are no songs to play')
-    else:
-        message.reply('There are no songs to play')
+                return slackify.player.play(nxt.song, slackify.queue.MODE_QUEUE)
+    # Start a related/random song
+    if slackify.queue.mode == QueueManager.MODE_RELATED:
+        nxt = slackify.player.related(single=True)
+        if nxt:
+            return slackify.player.play(nxt, QueueManager.MODE_RELATED)
+
+    # Try a random song
+    nxt = slackify.queue.random()
+    if nxt:
+        return slackify.player.play(nxt.song, QueueManager.MODE_RANDOM)
+
+    message.reply('There are no songs to play')
 
 
 @respond_to('^(r|rm|remove) (last|\d+)$')
@@ -96,3 +101,10 @@ def queue_remove(message, cmd, position):
             message.reply(u'Removed {0}'.format(deleted))
         else:
             message.reply(u'Could not remove: {0}'.format(deleted))
+
+@respond_to('^mode$')
+@respond_to('^mode (related|random)')
+def queue_mode(message, mode=None):
+    if mode:
+        slackify.queue.mode = mode
+    message.reply(u'Playing {0} songs when the queue is empty'.format(slackify.queue.mode))
