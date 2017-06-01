@@ -7,6 +7,7 @@ import json
 import spotify
 import spotipy
 from spotify import utils
+from spotipy.oauth2 import SpotifyClientCredentials
 
 class Song:
     def __init__(self, uri, title, artist, duration):
@@ -43,7 +44,9 @@ class SpotifyPlayer(utils.EventEmitter):
         # Initialize the EventEmitter
         super(SpotifyPlayer, self).__init__()
         self.session = None
-        self.web = spotipy.Spotify()
+
+        client_credentials_manager = SpotifyClientCredentials()
+        self.web = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
         # Events for coordination
         self._logged_in = threading.Event()
         self._loop =  None
